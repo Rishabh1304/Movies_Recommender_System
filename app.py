@@ -2,6 +2,8 @@ import streamlit as st
 import pickle
 import pandas as pd
 import requests
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 def fetch_poster(movie_id):
     url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key=8265bd1679663a7ea12ac168da84d2e8&language=en-US"
@@ -16,7 +18,10 @@ st.title('🎬 Movie Recommender System')
 
 movies_dict = pickle.load(open('movies.pkl', 'rb'))
 movies = pd.DataFrame(movies_dict)
-similarity = pickle.load(open('similarity.pkl', 'rb'))
+# LIVE SIMILARITY GENERATION
+cv = CountVectorizer(max_features=5000, stop_words='english')
+vector = cv.fit_transform(movies['tags']).toarray()
+similarity = cosine_similarity(vector)
 
 def recommend(movie):
     movie_index = movies[movies['title'] == movie].index[0]
